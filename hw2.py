@@ -107,5 +107,6 @@ if __name__ == "__main__":
     '''    
     file_name = 'input.txt'
 
+
     partA(file_name)
     partB(file_name)
