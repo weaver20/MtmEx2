@@ -57,7 +57,7 @@ def printCompetitor(competitor):
     competitor_id = competitor['competitor id']
     competitor_country = competitor['competitor country']
     result = competitor['result']
-    
+
     print(f'Competitor {competitor_id} from {competitor_country} participated in {competition_name} ({competition_type}) and scored {result}')
 
 
@@ -126,10 +126,15 @@ def calcCompetitionsResults(competitors_in_competitions):
 
     sorted_timed_competitions = sorted(timed_competitions, key=itemgetter('competition name', 'result'), reverse=True)
     sorted_untimed_competitions = sorted(untimed_competitions, key=itemgetter('competition name', 'result'))
-    #todo: sorted_knockout_competitions
+    sorted_knockout_competitions = sorted(knockout_competitions, key=itemgetter('competition name', 'result'), reverse=True)
 
-    competitions_types =[sorted_untimed_competitions, sorted_timed_competitions]
-    results = []
+
+    competitions_types =[
+        sorted_untimed_competitions,
+        sorted_timed_competitions,
+        sorted_knockout_competitions
+    ]
+
     for current_type in competitions_types:
 
         while current_type:
@@ -146,11 +151,8 @@ def calcCompetitionsResults(competitors_in_competitions):
                     else:
                         champion_entry = current_type.pop(-1)
                         current_result.append(champion_entry['competitor country'])       # appending the champion to the score board
-                results.append(current_result)                                            # adding the competition result to the results
+                competitions_champs.append(current_result)                                            # adding the competition result to the competitions_champs
                 deleteAllCompetitionEntries(current_type, current_competition) #deleting all entries of that competition - don't need them.
-
-
-
 
     return competitions_champs
 
@@ -161,13 +163,13 @@ def partA(file_name = 'input.txt', allow_prints = True):
     if allow_prints:
         for competitor in sorted(competitors_in_competitions, key=key_sort_competitor):
             printCompetitor(competitor)
-    
+
     # calculate competition results
     competitions_results = calcCompetitionsResults(competitors_in_competitions)
     if allow_prints:
         for competition_result_single in sorted(competitions_results):
             printCompetitionResults(*competition_result_single)
-    
+
     return competitions_results
 
 
@@ -182,7 +184,7 @@ if __name__ == "__main__":
     __main__ is the name of the scope in which top-level code executes.
     
     To run only a single part, comment the line below which correspondes to the part you don't want to run.
-    '''    
+    '''
     file_name = 'input.txt'
 
 
