@@ -1,3 +1,49 @@
+
+
+from operator import itemgetter
+
+def isValidChampion(competitions, competition_name):
+
+    if competitions[-1]['competition name'] != competition_name:
+        # there is no competition entries for this competition name
+        return True
+    champion_id = competitions[-1]['competitor id']
+    is_valid = True
+
+    for competition_entry in competitions[-2::-1]:
+        if competition_entry['competition name'] != competition_name:
+            break
+        elif competition_entry['competitor id'] == champion_id:
+            is_valid = False
+            competitions.remove(competition_entry)
+
+    if not is_valid:
+        del competitions[-1]
+        return False
+
+    return True
+
+def clearInvalidChampions(competitions,competition_name):
+    while not isValidChampion(competitions,competition_name):
+        continue
+    return
+
+
+def deleteAllCompetitionEntries(competitions, competition_to_delete):
+    if competitions:
+        deleted = True
+    else:
+        deleted = False
+    while deleted:
+        if competitions[-1]['competition name'] != competition_to_delete:
+            deleted = False
+            continue
+        else:
+            del competitions[-1]
+
+    return
+
+
 def printCompetitor(competitor):
     '''
     Given the data of a competitor, the function prints it in a specific format.
@@ -66,14 +112,46 @@ def calcCompetitionsResults(competitors_in_competitions):
     Arguments:
         competitors_in_competitions: A list that contains the data of the competitors
                                     (see readParseData return value for more info)
-    Retuen value:
-        A list of competitions and their champs (list of lists). 
+    Return value:
+        A list of competitions and their champs (list of lists).
         Every record in the list contains the competition name and the champs, in the following format:
         [competition_name, winning_gold_country, winning_silver_country, winning_bronze_country]
     '''
     competitions_champs = []
     # TODO Part A, Task 3.5
-    
+
+    untimed_competitions = [dict for dict in competitors_in_competitions if dict['competition type'] == 'untimed']
+    timed_competitions = [dict for dict in competitors_in_competitions if dict['competition type'] == 'timed']
+    knockout_competitions = [dict for dict in competitors_in_competitions if dict['competition type'] == 'knockout']
+
+    sorted_timed_competitions = sorted(timed_competitions, key=itemgetter('competition name', 'result'), reverse=True)
+    sorted_untimed_competitions = sorted(untimed_competitions, key=itemgetter('competition name', 'result'))
+    #todo: sorted_knockout_competitions
+
+    competitions_types =[sorted_untimed_competitions, sorted_timed_competitions]
+    results = []
+    for current_type in competitions_types:
+
+        while current_type:
+            current_competition = current_type[-1]['competition name']
+            clearInvalidChampions(current_type, current_competition)
+
+            if current_type[-1]['competition name'] != current_competition:
+                continue
+            else:
+                current_result =[current_competition]
+                for i in range(3):
+                    if (not current_type) or (current_type[-1]['competition name'] != current_competition):
+                        current_result.append('undef_country')
+                    else:
+                        champion_entry = current_type.pop(-1)
+                        current_result.append(champion_entry['competitor country'])       # appending the champion to the score board
+                results.append(current_result)                                            # adding the competition result to the results
+                deleteAllCompetitionEntries(current_type, current_competition) #deleting all entries of that competition - don't need them.
+
+
+
+
     return competitions_champs
 
 
