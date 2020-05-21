@@ -23,6 +23,7 @@ def isValidChampion(competitions, competition_name):
 
     return True
 
+
 def clearInvalidChampions(competitions,competition_name):
     while not isValidChampion(competitions,competition_name):
         continue
@@ -101,9 +102,26 @@ def readParseData(file_name):
     '''
     competitors_in_competitions = []
     # TODO Part A, Task 3.4
+    with open(file_name, 'r') as f:
+        lines = f.readlines()
+        competitor_lines = []
+        for line in lines:
+            line_parts = line.split()
+            if line_parts[0] == 'competition':
+                competitors_in_competitions.append({'competition name': line_parts[1],
+                                                    'competition type': line_parts[3],
+                                                    'competitor id': int(line_parts[2]),
+                                                    'competitor country': 'none',
+                                                    'result': int(line_parts[4])})
+            else:
+                competitor_lines.append(line_parts[1:])
 
+        for line_parts in competitor_lines:
+            for competition_entry in competitors_in_competitions:
+                if int(line_parts[0]) == competition_entry['competitor id']:
+                    competition_entry['competitor country'] = line_parts[1]
 
-    return competitors_in_competitions
+        return competitors_in_competitions
 
 
 def calcCompetitionsResults(competitors_in_competitions):
@@ -124,9 +142,9 @@ def calcCompetitionsResults(competitors_in_competitions):
     timed_competitions = [dict for dict in competitors_in_competitions if dict['competition type'] == 'timed']
     knockout_competitions = [dict for dict in competitors_in_competitions if dict['competition type'] == 'knockout']
 
-    sorted_timed_competitions = sorted(timed_competitions, key=itemgetter('competition name', 'result'), reverse=True)
-    sorted_untimed_competitions = sorted(untimed_competitions, key=itemgetter('competition name', 'result'))
-    sorted_knockout_competitions = sorted(knockout_competitions, key=itemgetter('competition name', 'result'), reverse=True)
+    sorted_timed_competitions = sorted(timed_competitions, key=key_sort_competitor, reverse=True)
+    sorted_untimed_competitions = sorted(untimed_competitions, key=key_sort_competitor)
+    sorted_knockout_competitions = sorted(knockout_competitions, key=key_sort_competitor, reverse=True)
 
 
     competitions_types =[
@@ -185,8 +203,8 @@ if __name__ == "__main__":
     
     To run only a single part, comment the line below which correspondes to the part you don't want to run.
     '''
-    file_name = 'input.txt'
+    file_name = 'test1.txt'
 
 
-    partA(file_name)
-    partB(file_name)
+    partA(file_name, True)
+    # partB(file_name)
