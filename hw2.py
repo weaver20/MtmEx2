@@ -31,11 +31,11 @@ def clearInvalidChampions(competitions,competition_name):
 
 
 def deleteAllCompetitionEntries(competitions, competition_to_delete):
-    if competitions:
+    if competitions or len(competitions) > 0:
         deleted = True
     else:
         deleted = False
-    while deleted:
+    while deleted: #TODO fix bug here index error
         if competitions[-1]['competition name'] != competition_to_delete:
             deleted = False
             continue
@@ -203,7 +203,7 @@ if __name__ == "__main__":
     
     To run only a single part, comment the line below which correspondes to the part you don't want to run.
     '''
-    file_name = 'test1.txt'
+    file_name = 'test2.txt'
 
 
     partA(file_name, True)
