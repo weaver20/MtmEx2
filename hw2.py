@@ -3,19 +3,19 @@
 from operator import itemgetter
 
 def isValidChampion(competitions, competition_name):
-    if competitions[-1]['competition name'] != competition_name:
+    if competitions[0]['competition name'] != competition_name:
         # there is no competition entries for this competition name
         return True
-    champion_id = competitions[-1]['competitor id']
+    champion_id = competitions[0]['competitor id']
     is_valid = True
-    for competition_entry in competitions[-2::-1]:
+    for competition_entry in competitions[1::]:
         if competition_entry['competition name'] != competition_name:
             continue
         elif competition_entry['competitor id'] == champion_id:
             is_valid = False
             competitions.remove(competition_entry)
     if not is_valid:
-        del competitions[-1]
+        del competitions[0]
         return False
     return True
 
@@ -32,12 +32,12 @@ def deleteAllCompetitionEntries(competitions, competition_to_delete):
         deleted = True
     else:
         deleted = False
-    while deleted: #TODO fix bug here index error
-        if competitions[-1]['competition name'] != competition_to_delete:
+    while deleted: #TODO fix bug here index error;
+        if competitions[0]['competition name'] != competition_to_delete:
             deleted = False
             continue
         else:
-            del competitions[-1]
+            del competitions[0]
 
     return
 
@@ -139,9 +139,9 @@ def calcCompetitionsResults(competitors_in_competitions):
     timed_competitions = [dict for dict in competitors_in_competitions if dict['competition type'] == 'timed']
     knockout_competitions = [dict for dict in competitors_in_competitions if dict['competition type'] == 'knockout']
 
-    sorted_timed_competitions = sorted(timed_competitions, key=key_sort_competitor, reverse=True)
-    sorted_untimed_competitions = sorted(untimed_competitions, key=key_sort_competitor)
-    sorted_knockout_competitions = sorted(knockout_competitions, key=key_sort_competitor, reverse=True)
+    sorted_timed_competitions = sorted(timed_competitions, key=key_sort_competitor)
+    sorted_untimed_competitions = sorted(untimed_competitions, key=key_sort_competitor, reverse=True)
+    sorted_knockout_competitions = sorted(knockout_competitions, key=key_sort_competitor)
 
 
     competitions_types =[
@@ -150,24 +150,24 @@ def calcCompetitionsResults(competitors_in_competitions):
         sorted_knockout_competitions
     ]
 
-    for current_type in competitions_types:
+    for current_competition_type in competitions_types:
 
-        while current_type:
-            current_competition_name = current_type[-1]['competition name']
-            clearInvalidChampions(current_type, current_competition_name)
+        while current_competition_type:
+            current_competition_name = current_competition_type[0]['competition name']
+            clearInvalidChampions(current_competition_type, current_competition_name)
 
-            if current_type[-1]['competition name'] != current_competition_name:
+            if current_competition_type[0]['competition name'] != current_competition_name:
                 continue
             else:
                 current_result = [current_competition_name]
                 for i in range(3):
-                    if (not current_type) or (current_type[-1]['competition name'] != current_competition_name):
+                    if (not current_competition_type) or (current_competition_type[0]['competition name'] != current_competition_name):
                         current_result.append('undef_country')
                     else:
-                        champion_entry = current_type.pop(-1)
+                        champion_entry = current_competition_type.pop(0)
                         current_result.append(champion_entry['competitor country'])       # appending the champion to the score board
                 competitions_champs.append(current_result)                                            # adding the competition result to the competitions_champs
-                #deleteAllCompetitionEntries(current_type, current_competition_name) #deleting all entries of that competition - don't need them.
+                #deleteAllCompetitionEntries(current_competition_type, current_competition_name) #deleting all entries of that competition - don't need them.
 
     return competitions_champs
 
@@ -200,7 +200,7 @@ if __name__ == "__main__":
     
     To run only a single part, comment the line below which correspondes to the part you don't want to run.
     '''
-    file_name = 'test1.txt'
+    file_name = 'test2.txt'
 
 
     partA(file_name, True)
