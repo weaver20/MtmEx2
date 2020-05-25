@@ -3,31 +3,28 @@
 from operator import itemgetter
 
 def isValidChampion(competitions, competition_name):
-
     if competitions[-1]['competition name'] != competition_name:
         # there is no competition entries for this competition name
         return True
     champion_id = competitions[-1]['competitor id']
     is_valid = True
-
     for competition_entry in competitions[-2::-1]:
         if competition_entry['competition name'] != competition_name:
-            break
+            continue
         elif competition_entry['competitor id'] == champion_id:
             is_valid = False
             competitions.remove(competition_entry)
-
     if not is_valid:
         del competitions[-1]
         return False
-
     return True
 
 
-def clearInvalidChampions(competitions,competition_name):
-    while not isValidChampion(competitions,competition_name):
+def clearInvalidChampions(competitions, competition_name):
+    while not isValidChampion(competitions, competition_name):
         continue
     return
+
 
 
 def deleteAllCompetitionEntries(competitions, competition_to_delete):
@@ -101,10 +98,10 @@ def readParseData(file_name):
                 'result': result}
     '''
     competitors_in_competitions = []
+    competitor_lines = []
     # TODO Part A, Task 3.4
     with open(file_name, 'r') as f:
         lines = f.readlines()
-        competitor_lines = []
         for line in lines:
             line_parts = line.split()
             if line_parts[0] == 'competition':
@@ -156,21 +153,21 @@ def calcCompetitionsResults(competitors_in_competitions):
     for current_type in competitions_types:
 
         while current_type:
-            current_competition = current_type[-1]['competition name']
-            clearInvalidChampions(current_type, current_competition)
+            current_competition_name = current_type[-1]['competition name']
+            clearInvalidChampions(current_type, current_competition_name)
 
-            if current_type[-1]['competition name'] != current_competition:
+            if current_type[-1]['competition name'] != current_competition_name:
                 continue
             else:
-                current_result =[current_competition]
+                current_result = [current_competition_name]
                 for i in range(3):
-                    if (not current_type) or (current_type[-1]['competition name'] != current_competition):
+                    if (not current_type) or (current_type[-1]['competition name'] != current_competition_name):
                         current_result.append('undef_country')
                     else:
                         champion_entry = current_type.pop(-1)
                         current_result.append(champion_entry['competitor country'])       # appending the champion to the score board
                 competitions_champs.append(current_result)                                            # adding the competition result to the competitions_champs
-                deleteAllCompetitionEntries(current_type, current_competition) #deleting all entries of that competition - don't need them.
+                #deleteAllCompetitionEntries(current_type, current_competition_name) #deleting all entries of that competition - don't need them.
 
     return competitions_champs
 
@@ -203,7 +200,7 @@ if __name__ == "__main__":
     
     To run only a single part, comment the line below which correspondes to the part you don't want to run.
     '''
-    file_name = 'test2.txt'
+    file_name = 'test1.txt'
 
 
     partA(file_name, True)
