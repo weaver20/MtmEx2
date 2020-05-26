@@ -223,7 +223,15 @@ def partA(file_name='input.txt', allow_prints=True):
 
 def partB(file_name='input.txt'):
     competitions_results = partA(file_name, allow_prints=False)
-    # TODO Part B
+    import Olympics
+    olympics = Olympics.OlympicsCreate()
+
+    for competition in competitions_results:
+        Olympics.OlympicsUpdateCompetitionResults(
+            olympics, str(competition[1]), str(competition[2]), str(competition[3]))
+
+    Olympics.OlympicsWinningCountry(olympics)
+    Olympics.OlympicsDestroy(olympics)
 
 
 if __name__ == "__main__":
@@ -236,4 +244,4 @@ if __name__ == "__main__":
     file_name = 'tests/in/test1.txt'
 
     partA(file_name, True)
-    # partB(file_name)
+    partB(file_name)
