@@ -72,11 +72,6 @@ def calc_winners(candidates):
         #   2. no more entries of current competition
         #   3. reached end of list
 
-
-            #TODO: secondary index referenced before assignment??
-
-
-        # FIX for 2. - no more entries:
         while len(winners_list) < 4:
             winners_list.append('undef_country')
 
@@ -86,51 +81,6 @@ def calc_winners(candidates):
 
     return competition_champs
 
-'''
-def calc_winners(candidates):
-    competition_champs = []
-    for entry in candidates:
-        if candidates.index(entry) == 0:
-            entry2 = entry
-        if entry2 is None:
-            break
-        competition_name = candidates[candidates.index(entry)]['competition name']
-        winning_list = [competition_name]
-        count = 0
-        ans = False # flag that helps to determine if we've still haven't reached the end
-        if entry == entry2:
-            last_index = candidates.index(entry)
-            for iterator in candidates[last_index::]:
-                if iterator['competition name'] != competition_name:
-                    ans = True
-                    break
-                if count == 3:
-                    break
-                winning_list.append(get_country(iterator))
-                count += 1
-
-            if len(winning_list) < 4:
-                while len(winning_list) < 4:
-                    winning_list.append('undef_country')
-
-            competition_champs.append(winning_list)
-            if ans is True:
-                next_index = candidates.index(iterator)
-
-            else:
-                next_index = candidates.index(iterator) + 1
-
-            if next_index == len(candidates):
-                entry2 = None
-
-            else:
-                entry2 = candidates[next_index]
-
-    if not competition_champs:
-        return []
-
-    return competition_champs
-'''
 
 def printCompetitor(competitor):
     '''
@@ -266,7 +216,7 @@ def partA(file_name='tests/in/test1.txt', allow_prints=True):
     return competitions_results
 
 
-def partB(file_name='tests/in/test1.txt'):
+def partB(file_name='input.txt'):
     competitions_results = partA(file_name, allow_prints=False)
     import Olympics
     olympics = Olympics.OlympicsCreate()
@@ -286,7 +236,7 @@ if __name__ == "__main__":
     
     To run only a single part, comment the line below which correspondes to the part you don't want to run.
     '''
-    file_name = 'test1.txt'
+    file_name = 'input.txt'
 
-    partA(file_name, True)
-    #partB(file_name)
+    partA(file_name)
+    partB(file_name)
