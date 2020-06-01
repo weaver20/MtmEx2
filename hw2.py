@@ -1,45 +1,85 @@
-
-
 from operator import itemgetter
-
-def isValidChampion(competitions, competition_name):
-    if competitions[-1]['competition name'] != competition_name:
-        # there is no competition entries for this competition name
-        return True
-    champion_id = competitions[-1]['competitor id']
-    is_valid = True
-    for competition_entry in competitions[-2::-1]:
-        if competition_entry['competition name'] != competition_name:
-            continue
-        elif competition_entry['competitor id'] == champion_id:
-            is_valid = False
-            competitions.remove(competition_entry)
-    if not is_valid:
-        del competitions[-1]
-        return False
-    return True
+from copy import deepcopy
 
 
-def clearInvalidChampions(competitions, competition_name):
-    while not isValidChampion(competitions, competition_name):
-        continue
-    return
+def find_cheaters(competitions):
+    if not competitions:
+        return []
+    cheaters_index_list = []
+
+    for index, competition_candidate in enumerate(competitions):
+        is_a_cheater = False
+        competition_name = competition_candidate['competition name']
+        competition_id = competition_candidate['competitor id']
+        iteration_index = index + 1
+        if iteration_index == len(competitions):
+            break
+        competitor = competitions[iteration_index]
+
+        while competitor['competition name'] == competition_name:
+            if competitor['competitor id'] == competition_id:
+                cheaters_index_list.append(iteration_index)
+                if is_a_cheater is False:
+                    cheaters_index_list.append(index)
+                    is_a_cheater = True
+            iteration_index += 1
+            if iteration_index == len(competitions):
+                break
+            competitor = competitions[iteration_index]
+
+    return sorted(cheaters_index_list)
 
 
+def remove_cheaters(cheaters_index_list, competitions):
+    valid_competitors = []
+    for index, entry in enumerate(competitions):
+        if index not in cheaters_index_list:
+            valid_competitors.append(entry)
+    return valid_competitors
 
-def deleteAllCompetitionEntries(competitions, competition_to_delete):
-    if competitions or len(competitions) > 0:
-        deleted = True
-    else:
-        deleted = False
-    while deleted: #TODO fix bug here index error
-        if competitions[-1]['competition name'] != competition_to_delete:
-            deleted = False
-            continue
-        else:
-            del competitions[-1]
 
-    return
+def get_country(entry):
+    return entry['competitor country']
+
+def calc_winners(candidates):
+    '''
+    trying something - aviram
+    '''
+    competition_champs = []
+    done_with_that = False
+
+    for index, entry in enumerate(candidates):
+        if index != 0:
+            if done_with_that and entry['competition name'] == current_competition_name:
+                continue
+            else:
+                done_with_that = False
+
+        if not done_with_that:
+            current_competition_name = entry['competition name']
+            winners_list = [current_competition_name]
+
+        for secondary_index, secondary_entry in list(enumerate(candidates))[index:]:
+            if secondary_entry['competition name'] != current_competition_name:
+                break
+            if len(winners_list) == 4:
+                break
+            winners_list.append(get_country(secondary_entry))
+        done_with_that = True
+        competition_champs.append(winners_list)
+        # if were here:
+        #   1. finished taking 3 champions and there are more entries to current competition
+        #   2. no more entries of current competition
+        #   3. reached end of list
+
+        while len(winners_list) < 4:
+            winners_list.append('undef_country')
+
+        # Fix for 3. - reached end of list
+        if secondary_index == len(candidates) - 1:
+            break
+
+    return competition_champs
 
 
 def printCompetitor(competitor):
@@ -56,7 +96,9 @@ def printCompetitor(competitor):
     competitor_country = competitor['competitor country']
     result = competitor['result']
 
-    print(f'Competitor {competitor_id} from {competitor_country} participated in {competition_name} ({competition_type}) and scored {result}')
+    print \
+            (
+            f'Competitor {competitor_id} from {competitor_country} participated in {competition_name} ({competition_type}) and scored {result}')
 
 
 def printCompetitionResults(competition_name, winning_gold_country, winning_silver_country, winning_bronze_country):
@@ -68,7 +110,8 @@ def printCompetitionResults(competition_name, winning_gold_country, winning_silv
         winning_gold_country, winning_silver_country, winning_bronze_country: the champs countries
     '''
     undef_country = 'undef_country'
-    countries = [country for country in [winning_gold_country, winning_silver_country, winning_bronze_country] if country != undef_country]
+    countries = [country for country in [winning_gold_country, winning_silver_country, winning_bronze_country] if
+                 country != undef_country]
     print(f'The winning competitors in {competition_name} are from: {countries}')
 
 
@@ -132,47 +175,32 @@ def calcCompetitionsResults(competitors_in_competitions):
         Every record in the list contains the competition name and the champs, in the following format:
         [competition_name, winning_gold_country, winning_silver_country, winning_bronze_country]
     '''
+
     competitions_champs = []
     # TODO Part A, Task 3.5
 
     untimed_competitions = [dict for dict in competitors_in_competitions if dict['competition type'] == 'untimed']
-    timed_competitions = [dict for dict in competitors_in_competitions if dict['competition type'] == 'timed']
-    knockout_competitions = [dict for dict in competitors_in_competitions if dict['competition type'] == 'knockout']
+    timed_competitions = [dict for dict in competitors_in_competitions if dict['competition type'] == 'timed'
+                          or dict['competition type'] == 'knockout']
 
-    sorted_timed_competitions = sorted(timed_competitions, key=key_sort_competitor, reverse=True)
-    sorted_untimed_competitions = sorted(untimed_competitions, key=key_sort_competitor)
-    sorted_knockout_competitions = sorted(knockout_competitions, key=key_sort_competitor, reverse=True)
+    sorted_timed_competitions = sorted(timed_competitions, key=key_sort_competitor)
+    sorted_untimed_competitions = sorted(untimed_competitions, key=key_sort_competitor, reverse=True)
 
+    cheaters_list_timed = find_cheaters(sorted_timed_competitions)
+    cheaters_list_untimed = find_cheaters(sorted_untimed_competitions)
 
-    competitions_types =[
-        sorted_untimed_competitions,
-        sorted_timed_competitions,
-        sorted_knockout_competitions
-    ]
+    clear_timed_list = remove_cheaters(cheaters_list_timed, sorted_timed_competitions)
+    clear_untimed_list = remove_cheaters(cheaters_list_untimed, sorted_untimed_competitions)
 
-    for current_type in competitions_types:
+    winners_timed = calc_winners(clear_timed_list)
+    winners_untimed = calc_winners(clear_untimed_list)
 
-        while current_type:
-            current_competition_name = current_type[-1]['competition name']
-            clearInvalidChampions(current_type, current_competition_name)
-
-            if current_type[-1]['competition name'] != current_competition_name:
-                continue
-            else:
-                current_result = [current_competition_name]
-                for i in range(3):
-                    if (not current_type) or (current_type[-1]['competition name'] != current_competition_name):
-                        current_result.append('undef_country')
-                    else:
-                        champion_entry = current_type.pop(-1)
-                        current_result.append(champion_entry['competitor country'])       # appending the champion to the score board
-                competitions_champs.append(current_result)                                            # adding the competition result to the competitions_champs
-                #deleteAllCompetitionEntries(current_type, current_competition_name) #deleting all entries of that competition - don't need them.
-
+    competitions_champs.extend(winners_untimed)
+    competitions_champs.extend(winners_timed)
     return competitions_champs
 
 
-def partA(file_name = 'input.txt', allow_prints = True):
+def partA(file_name='tests/in/test1.txt', allow_prints=True):
     # read and parse the input file
     competitors_in_competitions = readParseData(file_name)
     if allow_prints:
@@ -188,9 +216,17 @@ def partA(file_name = 'input.txt', allow_prints = True):
     return competitions_results
 
 
-def partB(file_name = 'input.txt'):
-    competitions_results = partA(file_name, allow_prints = False)
-    # TODO Part B
+def partB(file_name='input.txt'):
+    competitions_results = partA(file_name, allow_prints=False)
+    import Olympics
+    olympics = Olympics.OlympicsCreate()
+
+    for competition in competitions_results:
+        Olympics.OlympicsUpdateCompetitionResults(
+            olympics, str(competition[1]), str(competition[2]), str(competition[3]))
+
+    Olympics.OlympicsWinningCountry(olympics)
+    Olympics.OlympicsDestroy(olympics)
 
 
 if __name__ == "__main__":
@@ -200,8 +236,7 @@ if __name__ == "__main__":
     
     To run only a single part, comment the line below which correspondes to the part you don't want to run.
     '''
-    file_name = 'test1.txt'
+    file_name = 'input.txt'
 
-
-    partA(file_name, True)
-    # partB(file_name)
+    partA(file_name)
+    partB(file_name)
