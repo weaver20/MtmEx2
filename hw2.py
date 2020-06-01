@@ -41,6 +41,7 @@ def remove_cheaters(cheaters_index_list, competitions):
 def get_country(entry):
     return entry['competitor country']
 
+
 def calc_winners(candidates):
     '''
     trying something - aviram
@@ -66,7 +67,6 @@ def calc_winners(candidates):
                 break
             winners_list.append(get_country(secondary_entry))
         done_with_that = True
-        competition_champs.append(winners_list)
         # if were here:
         #   1. finished taking 3 champions and there are more entries to current competition
         #   2. no more entries of current competition
@@ -75,8 +75,10 @@ def calc_winners(candidates):
         while len(winners_list) < 4:
             winners_list.append('undef_country')
 
+        competition_champs.append(winners_list)
+
         # Fix for 3. - reached end of list
-        if secondary_index == len(candidates) - 1:
+        if secondary_index == len(candidates):
             break
 
     return competition_champs
